@@ -11,6 +11,14 @@ ifndef OUTPUT_DIR
 OUTPUT_DIR:=$(shell pwd)
 endif
 
+ifndef DOCKERHUB_USER
+DOCKERHUB_USER:=docker
+endif
+
+ifndef DOCKERHUB_PWD
+DOCKERHUB_PWD:=docker
+endif
+
 ifndef TEMP_DIR
 TEMP_DIR:=$(shell mktemp -d /tmp/heapster.XXXXXX)
 endif
@@ -95,7 +103,8 @@ ifeq ($(ARCH),amd64)
 endif
 
 # Should depend on target: ./manifest-tool
-push: gcr-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
+# We wont support gcr repository, use dockerhub instead. push: gcr-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
+
 #	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(PREFIX)/heapster-ARCH:$(VERSION) --target $(PREFIX)/heapster:$(VERSION)
 
 sub-push-%:
