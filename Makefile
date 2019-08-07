@@ -7,6 +7,10 @@ ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
 ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
 GOLANG_VERSION?=1.8
 
+ifndef OUTPUT_DIR
+OUTPUT_DIR:=$(shell pwd)
+endif
+
 ifndef TEMP_DIR
 TEMP_DIR:=$(shell mktemp -d /tmp/heapster.XXXXXX)
 endif
@@ -43,8 +47,8 @@ fmt:
 	find . -type f -name "*.go" | grep -v "./vendor*" | xargs gofmt -s -w
 
 build: clean fmt
-	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o heapster k8s.io/heapster/metrics
-	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o eventer k8s.io/heapster/events
+	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o $(OUTPUT_DIR)/heapster k8s.io/heapster/metrics
+	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o $(OUTPUT_DIR)/eventer k8s.io/heapster/events
 
 sanitize:
 	hooks/check_boilerplate.sh
