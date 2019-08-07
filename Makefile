@@ -1,11 +1,16 @@
 all: build
 
-PREFIX?=staging-k8s.gcr.io
 FLAGS=
 ARCH?=amd64
 ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
 ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
 GOLANG_VERSION?=1.8
+
+ifdef REPOSITORY_PREFIX
+PREFIX:=$(REPOSITORY_PREFIX)
+else
+PREFIX:=staging-k8s.gcr.io
+endif
 
 ifndef OUTPUT_DIR
 OUTPUT_DIR:=$(shell pwd)
@@ -131,7 +136,7 @@ push-grafana:
 #endif
 #Using docker hub instead of gcr
 docker-login:
-	@echo "Docker login with user $(DOCKERHUB_USER) credential"
+	@echo "Docker login with user $(DOCKERHUB_USER) credential."
 	@echo $(DOCKERHUB_PWD) | docker login --username=$(DOCKERHUB_USER) --password-stdin
 
 # TODO(luxas): As soon as it's working to push fat manifests to gcr.io, reenable this code
