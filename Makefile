@@ -131,8 +131,8 @@ push-grafana:
 #endif
 #Using docker hub instead of gcr
 docker-login:
-    @echo "Docker login with user $(DOCKERHUB_USER) credential"
-    @echo $(DOCKERHUB_PWD) | docker login --username=$(DOCKERHUB_USER) --password-stdin
+	@echo "Docker login with user $(DOCKERHUB_USER) credential"
+	@echo $(DOCKERHUB_PWD) | docker login --username=$(DOCKERHUB_USER) --password-stdin
 
 # TODO(luxas): As soon as it's working to push fat manifests to gcr.io, reenable this code
 #./manifest-tool:
