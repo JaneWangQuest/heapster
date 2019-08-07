@@ -104,7 +104,7 @@ endif
 
 # Should depend on target: ./manifest-tool
 # We wont support gcr repository, use dockerhub instead. push: gcr-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
-
+push: docker-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
 #	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(PREFIX)/heapster-ARCH:$(VERSION) --target $(PREFIX)/heapster:$(VERSION)
 
 sub-push-%:
@@ -123,12 +123,16 @@ push-influxdb:
 push-grafana:
 	PREFIX=$(PREFIX) make -C grafana push
 
-gcr-login:
-ifeq ($(findstring gcr.io,$(PREFIX)),gcr.io)
-	@echo "If you are pushing to a gcr.io registry, you have to be logged in via 'docker login'; 'gcloud docker push' can't push manifest lists yet."
-	@echo "This script is automatically logging you in now with 'gcloud docker -a'"
-	gcloud docker -a
-endif
+#gcr-login:
+#ifeq ($(findstring gcr.io,$(PREFIX)),gcr.io)
+#	@echo "If you are pushing to a gcr.io registry, you have to be logged in via 'docker login'; 'gcloud docker push' can't push manifest lists yet."
+#	@echo "This script is automatically logging you in now with 'gcloud docker -a'"
+#	gcloud docker -a
+#endif
+#Using docker hub instead of gcr
+docker-login:
+    @echo "Docker login with user $(DOCKERHUB_USER) credential"
+    @echo $(DOCKERHUB_PWD) | docker login --username=$(DOCKERHUB_USER) --password-stdin
 
 # TODO(luxas): As soon as it's working to push fat manifests to gcr.io, reenable this code
 #./manifest-tool:
