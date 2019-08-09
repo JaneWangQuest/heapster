@@ -6,8 +6,8 @@ all: build
 #SUPPORTED_KUBE_VERSIONS like 1.9.3, etc.
 #ARCH like amd64, etc.
 #HEAPSTER_BUILD_DIR like /<some directory path>
+#REPO_PREFIX like k8s.gcr.io, etc.
 
-PREFIX?=staging-k8s.gcr.io
 FLAGS=
 ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
 ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
@@ -78,9 +78,9 @@ container:
 
 build-image:
 	cp $(REPO_DIR)/deploy/docker/Dockerfile $(HEAPSTER_BUILD_DIR)
-	docker build --pull -t $(PREFIX)/heapster-$(ARCH):$(VERSION) $(TEMP_DIR)
+	docker build --pull -t $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(TEMP_DIR)
 ifneq ($(OVERRIDE_IMAGE_NAME),)
-	docker tag $(PREFIX)/heapster-$(ARCH):$(VERSION) $(OVERRIDE_IMAGE_NAME)
+	docker tag $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(OVERRIDE_IMAGE_NAME)
 endif
 
 ifndef DOCKER_IN_DOCKER
@@ -88,35 +88,35 @@ ifndef DOCKER_IN_DOCKER
 endif
 
 do-push:
-	docker push $(PREFIX)/heapster-$(ARCH):$(VERSION)
+	docker push $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION)
 ifeq ($(ARCH),amd64)
 # TODO: Remove this and push the manifest list as soon as it's working
-	docker tag $(PREFIX)/heapster-$(ARCH):$(VERSION) $(PREFIX)/heapster:$(VERSION)
-	docker push $(PREFIX)/heapster:$(VERSION)
+	docker tag $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(REPO_PREFIX)/heapster:$(VERSION)
+	docker push $(REPO_PREFIX)/heapster:$(VERSION)
 endif
 
 # Should depend on target: ./manifest-tool
 push: gcr-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
-#	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(PREFIX)/heapster-ARCH:$(VERSION) --target $(PREFIX)/heapster:$(VERSION)
+#	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(REPO_PREFIX)/heapster-ARCH:$(VERSION) --target $(REPO_PREFIX)/heapster:$(VERSION)
 
 sub-push-%:
-	$(MAKE) ARCH=$* PREFIX=$(PREFIX) VERSION=$(VERSION) container
-	$(MAKE) ARCH=$* PREFIX=$(PREFIX) VERSION=$(VERSION) do-push
+	$(MAKE) ARCH=$* REPO_PREFIX=$(REPO_PREFIX) VERSION=$(VERSION) container
+	$(MAKE) ARCH=$* REPO_PREFIX=$(REPO_PREFIX) VERSION=$(VERSION) do-push
 
 influxdb:
-	ARCH=$(ARCH) PREFIX=$(PREFIX) make -C influxdb build
+	ARCH=$(ARCH) REPO_PREFIX=$(REPO_PREFIX) make -C influxdb build
 
 grafana:
-	ARCH=$(ARCH) PREFIX=$(PREFIX) make -C grafana build
+	ARCH=$(ARCH) REPO_PREFIX=$(REPO_PREFIX) make -C grafana build
 
 push-influxdb:
-	PREFIX=$(PREFIX) make -C influxdb push
+	REPO_PREFIX=$(REPO_PREFIX) make -C influxdb push
 
 push-grafana:
-	PREFIX=$(PREFIX) make -C grafana push
+	REPO_PREFIX=$(REPO_PREFIX) make -C grafana push
 
 gcr-login:
-ifeq ($(findstring gcr.io,$(PREFIX)),gcr.io)
+ifeq ($(findstring gcr.io,$(REPO_PREFIX)),gcr.io)
 	@echo "If you are pushing to a gcr.io registry, you have to be logged in via 'docker login'; 'gcloud docker push' can't push manifest lists yet."
 	@echo "This script is automatically logging you in now with 'gcloud docker -a'"
 	gcloud docker -a
