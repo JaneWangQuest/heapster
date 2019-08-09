@@ -7,6 +7,7 @@ all: build
 #ARCH like amd64, etc.
 #HEAPSTER_BUILD_DIR like /<some directory path>
 #REPO_PREFIX like k8s.gcr.io, etc.
+#DOCKERHUB_USER and DOCKERHUB_PWD should be defined previously.
 
 FLAGS=
 ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
@@ -134,6 +135,5 @@ docker-login:
 clean:
 	rm -f heapster
 	rm -f eventer
-	docker rmi $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION)
 
 .PHONY: all build sanitize test-unit test-unit-cov test-integration container grafana influxdb clean
