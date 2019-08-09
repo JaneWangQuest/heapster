@@ -5,10 +5,10 @@ all: build
 #VERSION like v1.6.0-beta.1, etc.
 #SUPPORTED_KUBE_VERSIONS like 1.9.3, etc.
 #ARCH like amd64, etc.
+#HEAPSTER_BUILD_DIR like /<some directory path>
 
 PREFIX?=staging-k8s.gcr.io
 FLAGS=
-ARCH?=amd64
 ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
 ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
 #GOLANG_VERSION?=1.8
@@ -47,8 +47,8 @@ fmt:
 	find . -type f -name "*.go" | grep -v "./vendor*" | xargs gofmt -s -w
 
 build: clean fmt
-	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o heapster k8s.io/heapster/metrics
-	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o eventer k8s.io/heapster/events
+	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o $(HEAPSTER_BUILD_DIR)/heapster k8s.io/heapster/metrics
+	GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags "$(HEAPSTER_LDFLAGS)" -o $(HEAPSTER_BUILD_DIR)/eventer k8s.io/heapster/events
 
 sanitize:
 	hooks/check_boilerplate.sh
@@ -76,7 +76,8 @@ container:
 		&& GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags \"$(HEAPSTER_LDFLAGS)\" -o /build/heapster k8s.io/heapster/metrics \
 		&& GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags \"$(HEAPSTER_LDFLAGS)\" -o /build/eventer k8s.io/heapster/events"
 
-	cp deploy/docker/Dockerfile $(TEMP_DIR)
+build-image:
+	cp $(REPO_DIR)/deploy/docker/Dockerfile $(HEAPSTER_BUILD_DIR)
 	docker build --pull -t $(PREFIX)/heapster-$(ARCH):$(VERSION) $(TEMP_DIR)
 ifneq ($(OVERRIDE_IMAGE_NAME),)
 	docker tag $(PREFIX)/heapster-$(ARCH):$(VERSION) $(OVERRIDE_IMAGE_NAME)
