@@ -77,7 +77,7 @@ container:
 		&& GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags \"$(HEAPSTER_LDFLAGS)\" -o /build/eventer k8s.io/heapster/events"
 
 build-image:
-	cp $(REPO_DIR)/deploy/docker/Dockerfile $(HEAPSTER_BUILD_DIR)
+	cp $(REPO_DIR)/deploy/docker/Dockerfile $(HEAPSTER_BUILD_DIR)/Dockerfile
 	docker build --pull -t $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(TEMP_DIR)
 ifneq ($(OVERRIDE_IMAGE_NAME),)
 	docker tag $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(OVERRIDE_IMAGE_NAME)
@@ -96,7 +96,7 @@ ifeq ($(ARCH),amd64)
 endif
 
 # Should depend on target: ./manifest-tool
-push: gcr-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
+push: docker-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
 #	./manifest-tool push from-args --platforms $(ML_PLATFORMS) --template $(REPO_PREFIX)/heapster-ARCH:$(VERSION) --target $(REPO_PREFIX)/heapster:$(VERSION)
 
 sub-push-%:
@@ -115,12 +115,15 @@ push-influxdb:
 push-grafana:
 	REPO_PREFIX=$(REPO_PREFIX) make -C grafana push
 
-gcr-login:
-ifeq ($(findstring gcr.io,$(REPO_PREFIX)),gcr.io)
-	@echo "If you are pushing to a gcr.io registry, you have to be logged in via 'docker login'; 'gcloud docker push' can't push manifest lists yet."
-	@echo "This script is automatically logging you in now with 'gcloud docker -a'"
-	gcloud docker -a
-endif
+#gcr-login:
+#ifeq ($(findstring gcr.io,$(REPO_PREFIX)),gcr.io)
+#	@echo "If you are pushing to a gcr.io registry, you have to be logged in via 'docker login'; 'gcloud docker push' can't push manifest lists yet."
+#	@echo "This script is automatically logging you in now with 'gcloud docker -a'"
+#	gcloud docker -a
+#endif
+docker-login:
+	@echo "Docker login with user $(DOCKERHUB_USER) credential."
+	@echo $(DOCKERHUB_PWD) | docker login --username=$(DOCKERHUB_USER) --password-stdin
 
 # TODO(luxas): As soon as it's working to push fat manifests to gcr.io, reenable this code
 #./manifest-tool:
@@ -130,5 +133,6 @@ endif
 clean:
 	rm -f heapster
 	rm -f eventer
+	docker rmi $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION)
 
 .PHONY: all build sanitize test-unit test-unit-cov test-integration container grafana influxdb clean
