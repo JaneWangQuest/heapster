@@ -79,7 +79,7 @@ container:
 
 build-image:
 	cp $(REPO_DIR)/deploy/docker/Dockerfile $(HEAPSTER_BUILD_DIR)/Dockerfile
-	docker build --pull -t $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(TEMP_DIR)
+	docker build --pull -t $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(HEAPSTER_BUILD_DIR)
 ifneq ($(OVERRIDE_IMAGE_NAME),)
 	docker tag $(REPO_PREFIX)/heapster-$(ARCH):$(VERSION) $(OVERRIDE_IMAGE_NAME)
 endif
