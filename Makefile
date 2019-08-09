@@ -84,7 +84,7 @@ run-container:
 	# Also, fetch the latest ca certificates
 	@echo "Run container for arch $(ARCH) with ldflags $(HEAPSTER_LDFLAGS) "
 	@docker run --rm -i $(TTY) -v $(TEMP_DIR):/build -v $(REPO_DIR):/go/src/k8s.io/heapster -w /go/src/k8s.io/heapster golang:$(GOLANG_VERSION) /bin/bash -c "\
-		cp $(OUTPUT_DIR)/ca-certificates.crt /build \
+		cp /etc/ssl/certs/ca-certificates.crt /build \
 		&& GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags \"$(HEAPSTER_LDFLAGS)\" -o /build/heapster k8s.io/heapster/metrics \
 		&& GOARCH=$(ARCH) CGO_ENABLED=0 go build -ldflags \"$(HEAPSTER_LDFLAGS)\" -o /build/eventer k8s.io/heapster/events"
 
