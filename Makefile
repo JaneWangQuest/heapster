@@ -101,6 +101,7 @@ push: docker-login $(addprefix sub-push-,$(ALL_ARCHITECTURES))
 
 sub-push-%:
 	$(MAKE) ARCH=$* REPO_PREFIX=$(REPO_PREFIX) VERSION=$(VERSION) container
+	$(MAKE) ARCH=$* REPO_PREFIX=$(REPO_PREFIX) VERSION=$(VERSION) build-image
 	$(MAKE) ARCH=$* REPO_PREFIX=$(REPO_PREFIX) VERSION=$(VERSION) do-push
 
 influxdb:
