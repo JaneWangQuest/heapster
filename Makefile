@@ -1,17 +1,22 @@
 all: build
 
+#Environment Prerequisite
+#GOLANG_VERSION like 1.8, 1.12.7, etc.
+#VERSION like v1.6.0-beta.1, etc.
+#SUPPORTED_KUBE_VERSIONS like 1.9.3, etc.
+#ARCH like amd64, etc.
+
 PREFIX?=staging-k8s.gcr.io
 FLAGS=
 ARCH?=amd64
 ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
 ML_PLATFORMS=linux/amd64,linux/arm,linux/arm64,linux/ppc64le,linux/s390x
-GOLANG_VERSION?=1.8
+#GOLANG_VERSION?=1.8
 
 ifndef TEMP_DIR
 TEMP_DIR:=$(shell mktemp -d /tmp/heapster.XXXXXX)
 endif
 
-VERSION?=v1.6.0-beta.1
 GIT_COMMIT:=$(shell git rev-parse --short HEAD)
 
 TESTUSER=
@@ -34,7 +39,6 @@ ifeq ($(INTERACTIVE), 1)
 	TTY=-t
 endif
 
-SUPPORTED_KUBE_VERSIONS=1.9.3
 TEST_NAMESPACE=heapster-e2e-tests
 
 HEAPSTER_LDFLAGS=-w -X k8s.io/heapster/version.HeapsterVersion=$(VERSION) -X k8s.io/heapster/version.GitCommit=$(GIT_COMMIT)
